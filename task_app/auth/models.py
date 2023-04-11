@@ -1,5 +1,13 @@
 from bson import ObjectId
-from pydantic import BaseModel, Field
+from datetime import datetime
+from enum import Enum
+from pydantic import BaseModel, Field, ValidationError, validator
+
+
+class RoleEnum(str, Enum):
+    admin = 'admin'
+    dev = 'dev'
+    simple_mortal = 'simple mortal'
 
 
 class PyObjectId(ObjectId):
@@ -22,10 +30,7 @@ class BaseUserModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     first_name: str = Field(...)
     last_name: str = Field(...)
-    role: str = Field(...)
-    is_active: str = Field(...)
-    created_at: str = Field(...)
-    last_login: str = Field(...)
+    role: RoleEnum = RoleEnum.simple_mortal
 
     class Config:
         allow_population_by_field_name = True
@@ -34,6 +39,9 @@ class BaseUserModel(BaseModel):
 
 
 class UserModel(BaseUserModel):
+    is_active: bool = Field(...)
+    created_at: datetime = Field(...)
+    last_login: datetime | None = Field(...)
     hashed_pass: str = Field(...)
 
     class Config(BaseUserModel.Config):
@@ -43,16 +51,23 @@ class UserModel(BaseUserModel):
                 "last_name": "Doe",
                 "role": "simple mortal",
                 "is_active": "false",
-                "created_at": "datetime",
-                "last_login": "datetime",
+                "created_at": "2023-04-11T10:52:42.931253",
+                "last_login": "2023-04-11T10:52:42.931253",
                 "hashed_pass": "fakehashedsecret",
             }
         }
 
 
 class CreateUserModel(BaseUserModel):
+    created_at: datetime = Field(default_factory=datetime.utcnow)
     password: str = Field(...)
     confirm_password: str = Field(...)
+
+    @validator('confirm_password')
+    def passwords_match(cls, confirm_password, values, **kwargs):
+        if 'password' in values and confirm_password != values['password']:
+            raise ValueError('Passwords do not match')
+        return confirm_password
 
     class Config(BaseUserModel.Config):
         schema_extra = {
@@ -60,9 +75,6 @@ class CreateUserModel(BaseUserModel):
                 "first_name": "John",
                 "last_name": "Doe",
                 "role": "simple mortal",
-                "is_active": "false",
-                "created_at": "datetime",
-                "last_login": "datetime",
                 "password": "fakesecret",
                 "confirm_password": "fakesecret",
             }
@@ -70,5 +82,32 @@ class CreateUserModel(BaseUserModel):
 
 
 class UpdateUserModel(BaseUserModel):
-    pass
+    first_name: str | None
+    last_name: str | None
+    role: str | None
+    is_active: bool | None
+    created_at: datetime | None
+    last_login: datetime | None
+
+    @validator('role')
+    def name_must_contain_space(cls, role):
+        available_roles = [member.value for member in RoleEnum]
+        if role not in available_roles:
+            raise ValueError('Available options are admin, dev and simple simple mortal')
+        return role
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "role": "simple mortal",
+                "is_active": True,
+                "created_at": "2023-04-11T10:52:42.931253",
+                "last_login": "2023-04-11T10:52:42.931253",
+            }
+        }
+
 

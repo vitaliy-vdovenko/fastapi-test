@@ -18,6 +18,8 @@ async def create_user(user: CreateUserModel = Body(...)):
     user_data = jsonable_encoder(user)
     password = user_data.pop('password')
     user_data.pop('confirm_password')
+    user_data['is_active'] = True
+    user_data['last_login'] = None
     user_data['hashed_pass'] = get_password_hash(password)
     new_user = await db["users"].insert_one(user_data)
     created_user = await db["users"].find_one({"_id": new_user.inserted_id})
@@ -27,6 +29,7 @@ async def create_user(user: CreateUserModel = Body(...)):
 @router.get("/", response_description="List all Users", response_model=List[UserModel])
 async def list_users():
     students = await db["users"].find().to_list(1000)
+    print(students)
     return students
 
 
@@ -58,7 +61,7 @@ async def update_user(user_id: str, student: UpdateUserModel = Body(...)):
 
 
 @router.delete("/{id}", response_description="Delete a User")
-async def delete_student(user_id: str):
+async def delete_user(user_id: str):
     delete_result = await db["users"].delete_one({"_id": user_id})
 
     if delete_result.deleted_count == 1:
