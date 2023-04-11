@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 
 from ..auth.models import UserModel, CreateUserModel, UpdateUserModel
+from ..auth.password_manager import get_password_hash
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
@@ -16,8 +17,8 @@ db = client.task_db
 async def create_user(user: CreateUserModel = Body(...)):
     user_data = jsonable_encoder(user)
     password = user_data.pop('password')
-    confirm_password = user_data.pop('confirm_password')
-    user_data['hashed_pass'] = password
+    user_data.pop('confirm_password')
+    user_data['hashed_pass'] = get_password_hash(password)
     new_user = await db["users"].insert_one(user_data)
     created_user = await db["users"].find_one({"_id": new_user.inserted_id})
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_user)
@@ -26,7 +27,6 @@ async def create_user(user: CreateUserModel = Body(...)):
 @router.get("/", response_description="List all Users", response_model=List[UserModel])
 async def list_users():
     students = await db["users"].find().to_list(1000)
-    print(students)
     return students
 
 

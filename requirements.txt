@@ -6,6 +6,7 @@ h11==0.14.0
 httptools==0.5.0
 idna==3.4
 motor==3.1.2
+passlib==1.7.4
 pydantic==1.10.7
 pymongo==4.3.3
 python-dotenv==1.0.0
