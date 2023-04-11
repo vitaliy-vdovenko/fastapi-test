@@ -26,12 +26,17 @@ class BaseUserModel(BaseModel):
     is_active: str = Field(...)
     created_at: str = Field(...)
     last_login: str = Field(...)
-    hashed_pass: str = Field(...)
 
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+
+
+class UserModel(BaseUserModel):
+    hashed_pass: str = Field(...)
+
+    class Config(BaseUserModel.Config):
         schema_extra = {
             "example": {
                 "first_name": "John",
@@ -45,12 +50,23 @@ class BaseUserModel(BaseModel):
         }
 
 
-class UserModel(BaseUserModel):
-    pass
-
-
 class CreateUserModel(BaseUserModel):
-    pass
+    password: str = Field(...)
+    confirm_password: str = Field(...)
+
+    class Config(BaseUserModel.Config):
+        schema_extra = {
+            "example": {
+                "first_name": "John",
+                "last_name": "Doe",
+                "role": "simple mortal",
+                "is_active": "false",
+                "created_at": "datetime",
+                "last_login": "datetime",
+                "password": "fakesecret",
+                "confirm_password": "fakesecret",
+            }
+        }
 
 
 class UpdateUserModel(BaseUserModel):

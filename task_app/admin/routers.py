@@ -15,6 +15,9 @@ db = client.task_db
 @router.post("/", response_description="Create new User", response_model=UserModel)
 async def create_user(user: CreateUserModel = Body(...)):
     user_data = jsonable_encoder(user)
+    password = user_data.pop('password')
+    confirm_password = user_data.pop('confirm_password')
+    user_data['hashed_pass'] = password
     new_user = await db["users"].insert_one(user_data)
     created_user = await db["users"].find_one({"_id": new_user.inserted_id})
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_user)
@@ -23,6 +26,7 @@ async def create_user(user: CreateUserModel = Body(...)):
 @router.get("/", response_description="List all Users", response_model=List[UserModel])
 async def list_users():
     students = await db["users"].find().to_list(1000)
+    print(students)
     return students
 
 
