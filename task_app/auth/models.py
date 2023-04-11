@@ -18,7 +18,7 @@ class PyObjectId(ObjectId):
         field_schema.update(type="string")
 
 
-class User(BaseModel):
+class BaseUserModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     first_name: str = Field(...)
     last_name: str = Field(...)
@@ -43,4 +43,16 @@ class User(BaseModel):
                 "hashed_pass": "fakehashedsecret",
             }
         }
+
+
+class UserModel(BaseUserModel):
+    pass
+
+
+class CreateUserModel(BaseUserModel):
+    pass
+
+
+class UpdateUserModel(BaseUserModel):
+    pass
 

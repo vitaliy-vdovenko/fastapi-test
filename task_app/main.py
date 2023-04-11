@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI
 
+from .admin import routers as admin_routers
 from .auth import routers as auth_routers
 
 app = FastAPI()
@@ -8,12 +9,8 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return {"message": os.environ["MONGODB_URL"]}
+    return {"message": "Welcome to test API"}
 
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
-
-
+app.include_router(admin_routers.router)
 app.include_router(auth_routers.router)
