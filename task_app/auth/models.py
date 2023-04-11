@@ -11,6 +11,7 @@ class RoleEnum(str, Enum):
 
 
 class PyObjectId(ObjectId):
+    """Handling ObjectIds before storing them as the _id."""
     @classmethod
     def __get_validators__(cls):
         yield cls.validate
@@ -27,6 +28,7 @@ class PyObjectId(ObjectId):
 
 
 class BaseUserModel(BaseModel):
+    """Base model, which includes common fields"""
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     first_name: str = Field(...)
     last_name: str = Field(...)
@@ -39,6 +41,7 @@ class BaseUserModel(BaseModel):
 
 
 class UserModel(BaseUserModel):
+    """User Model with all fields"""
     is_active: bool = Field(...)
     created_at: datetime = Field(...)
     last_login: datetime | None = Field(...)
@@ -59,6 +62,7 @@ class UserModel(BaseUserModel):
 
 
 class CreateUserModel(BaseUserModel):
+    """Created model with setting default value for created_at field"""
     created_at: datetime = Field(default_factory=datetime.utcnow)
     password: str = Field(...)
     confirm_password: str = Field(...)
@@ -82,6 +86,7 @@ class CreateUserModel(BaseUserModel):
 
 
 class UpdateUserModel(BaseUserModel):
+    """Update model"""
     first_name: str | None
     last_name: str | None
     role: str | None
