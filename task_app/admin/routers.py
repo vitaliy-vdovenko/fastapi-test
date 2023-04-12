@@ -5,8 +5,8 @@ from fastapi import APIRouter, Body, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 
-from ..auth.models import UserModel, CreateUserModel, UpdateUserModel
-from ..auth.password_manager import get_password_hash
+from task_app.auth.models import UserModel, CreateUserModel, UpdateUserModel
+from task_app.auth.password_manager import get_password_hash
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
@@ -28,9 +28,8 @@ async def create_user(user: CreateUserModel = Body(...)):
 
 @router.get("/", response_description="List all Users", response_model=List[UserModel])
 async def list_users():
-    students = await db["users"].find().to_list(1000)
-    print(students)
-    return students
+    users = await db["users"].find().to_list(1000)
+    return users
 
 
 @router.get("/{id}", response_description="Get a single User", response_model=UserModel)

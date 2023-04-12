@@ -70,7 +70,7 @@ class CreateUserModel(BaseUserModel):
     @validator('confirm_password')
     def passwords_match(cls, confirm_password, values, **kwargs):
         if 'password' in values and confirm_password != values['password']:
-            raise ValueError('Passwords do not match')
+            raise ValidationError('Passwords do not match')
         return confirm_password
 
     class Config(BaseUserModel.Config):
@@ -98,7 +98,7 @@ class UpdateUserModel(BaseUserModel):
     def name_must_contain_space(cls, role):
         available_roles = [member.value for member in RoleEnum]
         if role not in available_roles:
-            raise ValueError('Available options are admin, dev and simple simple mortal')
+            raise ValidationError('Available options are admin, dev and simple simple mortal')
         return role
 
     class Config:

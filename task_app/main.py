@@ -1,9 +1,11 @@
 import os
 from fastapi import FastAPI
 
-from .admin import routers as admin_routers
+from task_app.auth.middlewares import ASGIAuthenticationMiddleware
+from task_app.admin import routers as admin_routers
 
 app = FastAPI()
+app.add_middleware(ASGIAuthenticationMiddleware)
 
 
 @app.get("/")
